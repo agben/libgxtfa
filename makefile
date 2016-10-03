@@ -1,6 +1,6 @@
 SHELL = /bin/sh
 GCC = /usr/bin/gcc
-CFLAGS = -D$(DBUG) -Wall -fmax-errors=5
+CFLAGS = -D$(GXT_DEBUG) -Wall -fmax-errors=5
 
 # Install paths according to GNU make standards
 prefix = /usr/local
@@ -9,9 +9,9 @@ bindir = $(exec_prefix)/bin
 includedir = $(prefix)/include
 objdir = ~/Code/Obj
 
-all: $(objdir)/libFAutil.a
-$(objdir)/libFAutil.a: $(objdir)/fa_sql_generator.o $(objdir)/fa_sql_handler.o
-	ar rs $(objdir)/libFAutil.a $(objdir)/fa_*.o
+all: $(objdir)/libgxtfa.a
+$(objdir)/libgxtfa.a: $(objdir)/fa_sql_generator.o $(objdir)/fa_sql_handler.o
+	ar rs $(objdir)/libgxtfa.a $(objdir)/fa_*.o
 
 $(objdir)/fa_sql_generator.o: fa_sql_generator.c $(objdir)/fa_sql_generator_key.o
 	$(GCC) $(CFLAGS) -c $< -o $@
