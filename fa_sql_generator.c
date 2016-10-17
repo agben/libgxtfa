@@ -9,7 +9,7 @@
 //				db is a structure pointer to database definition data
 //				key is a pointer to any SQL script passed, which will be used as a key descriptor
 //				output is a pointer to an output buffer containing the generated SQL script
-//					the max buffer size is set by SQL_BUFFER_S0 in fa_sql_def.h
+//					the max buffer size is set by FA_BUFFER_S0 in fa_sql_def.h
 //		returns 0 if ok, else -1
 //
 //	See fa_sql_def.h for database definition structures
@@ -30,12 +30,12 @@
 #define FALSE	0
 
 
-int fa_sql_generator(int iAction, int *ipField, struct sql_db *spDb, char *cpPKey, char *cpO)
+int fa_sql_generator(int iAction, int *ipField, struct fa_sql_db *spDb, char *cpPKey, char *cpO)
   {
-    struct sql_column *spCol;						// pointer to sql column definitions
-    struct sql_table *spTab;						// pointer to sql table definitions
+    struct fa_sql_column *spCol;					// pointer to sql column definitions
+    struct fa_sql_table *spTab;						// pointer to sql table definitions
 
-    int iBuffMax = SQL_BUFFER_S0;					// max buffer size
+    int iBuffMax = FA_BUFFER_S0;					// max buffer size
     int i, j;
     char *cpKey = &spDb->cKey[iAction & FA_KEY_MASK][0];		// pointer to sql key definitions
 
@@ -57,7 +57,7 @@ int fa_sql_generator(int iAction, int *ipField, struct sql_db *spDb, char *cpPKe
 		cpO+=j;										// step through the output buffer
 		iBuffMax-=j;								// whilst reducing the remaining buffer space
 
-		if (*ipField == SQL_ALL_COLS_B0)
+		if (*ipField == FA_ALL_COLS_B0)
 		  {
 			snprintf(cpO, iBuffMax, "*");
 			cpO++;
@@ -117,9 +117,9 @@ int fa_sql_generator(int iAction, int *ipField, struct sql_db *spDb, char *cpPKe
 				j=snprintf(cpO, iBuffMax, "%s=", spCol->cName);	// output list of selected field names
 				cpO+=j;
 				iBuffMax-=j;
-				if (spCol->iFlag & SQL_COL_INT_B0)				// integer data
+				if (spCol->iFlag & FA_COL_INT_B0)			// integer data
 					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cPos);
-				else if (spCol->iFlag & SQL_COL_CHAR_B0)		// single char/byte data
+				else if (spCol->iFlag & FA_COL_CHAR_B0)		// single char/byte data
 					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cPos));
 				else										// else string/blob data
 					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cPos);
@@ -159,7 +159,7 @@ int fa_sql_generator(int iAction, int *ipField, struct sql_db *spDb, char *cpPKe
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if (((*ipField>>i) & 1) && !(spCol->iFlag & SQL_COL_AUTO_B0))
+			if (((*ipField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
 			  {									// Don't try writing to any auto-generated columns
 				j=snprintf(cpO, iBuffMax, "%s, ", spCol->cName);	// output list of selected field names
 				cpO+=j;
@@ -177,11 +177,11 @@ int fa_sql_generator(int iAction, int *ipField, struct sql_db *spDb, char *cpPKe
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if (((*ipField>>i) & 1) && !(spCol->iFlag & SQL_COL_AUTO_B0))
+			if (((*ipField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
 			  {								// Don't try writing to any auto-generated columns
-				if (spCol->iFlag & SQL_COL_INT_B0)
+				if (spCol->iFlag & FA_COL_INT_B0)
 					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cPos);
-				else if (spCol->iFlag & SQL_COL_CHAR_B0)
+				else if (spCol->iFlag & FA_COL_CHAR_B0)
 					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cPos));
 				else
 					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cPos);

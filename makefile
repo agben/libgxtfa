@@ -10,9 +10,11 @@ includedir = $(prefix)/include
 objdir = ~/Code/Obj
 
 all: $(objdir)/libgxtfa.a
-$(objdir)/libgxtfa.a: $(objdir)/fa_sql_generator.o $(objdir)/fa_sql_handler.o
+$(objdir)/libgxtfa.a: $(objdir)/fa_handler.o $(objdir)/fa_sql_generator.o $(objdir)/fa_sql_handler.o
 	ar rs $(objdir)/libgxtfa.a $(objdir)/fa_*.o
 
+$(objdir)/fa_handler.o: fa_handler.c
+	$(GCC) $(CFLAGS) -c $^ -o $@
 $(objdir)/fa_sql_generator.o: fa_sql_generator.c $(objdir)/fa_sql_generator_key.o
 	$(GCC) $(CFLAGS) -c $< -o $@
 $(objdir)/fa_sql_generator_key.o: fa_sql_generator_key.c

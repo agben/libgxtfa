@@ -10,11 +10,11 @@
 //				alias is a flag indicating if table aliases should be output
 //		returns the length of any output
 //
-//	See sql_def.h for database definition structures
+//	See fa_sql_def.h for database definition structures
 //
 // SQL commands generated should be ANSI standard compliant to support a wide variety of SQL database engines.
 //
-//	GNU GPLv3 licence	libgxtfa by Andrew Bennington Jan 2016 [www.benningtons.net]
+//	GNU GPLv3 licence	libgxtfa by Andrew Bennington 2016 [www.benningtons.net]
 //
 //--------------------------------------------------------------
 
@@ -24,10 +24,10 @@
 #include <ut_error.h>		// error handling and debug functions from libgxtut
 
 
-int fa_sql_generator_key(char *cpKey, struct sql_db *spDb, int *iBuffMax, char *cpO, int iAlias)
+int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, char *cpO, int iAlias)
   {
-    struct sql_column *spCol;	// pointer to sql column definitions
-    struct sql_table *spTab;	// pointer to sql table definitions
+    struct fa_sql_column *spCol;	// pointer to sql column definitions
+    struct fa_sql_table *spTab;		// pointer to sql table definitions
     int i;
     int iLen = 0;				// length of data added to output string - for returning to calling program
     char *cp = cpKey;			// start at begining of key template
@@ -64,16 +64,16 @@ int fa_sql_generator_key(char *cpKey, struct sql_db *spDb, int *iBuffMax, char *
 			  {
 				spCol++;
 				ut_check((++i < spTab->iCol),
-				"column not found %s pos:%d len:%d", cpKey, cpColStart-cpKey, iColLen-1);
+				"column not found %s pos:%ld len:%d", cpKey, cpColStart-cpKey, iColLen-1);
 			  }
 			ut_debug("column:%s",spCol->cName);
 			cpColStart = 0;						//ready for next column
 		  }
 		else if (*cp == '%')					// we should always have a table and column by now
 		  {
-			if (spCol->iFlag & SQL_COL_INT_B0)
+			if (spCol->iFlag & FA_COL_INT_B0)
 			  i=snprintf(cpO, *iBuffMax, "%d", *(int *)spCol->cPos);
-			else if (spCol->iFlag & SQL_COL_CHAR_B0)
+			else if (spCol->iFlag & FA_COL_CHAR_B0)
 			  i=snprintf(cpO, *iBuffMax, "\"%c\"", *(spCol->cPos));
 			else
 			  i=snprintf(cpO, *iBuffMax, "\"%s\"", spCol->cPos);

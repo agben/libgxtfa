@@ -15,5 +15,5 @@ struct
   {
     sqlite3 *db[FL_M0];
     sqlite3_stmt *row[FL_M0];
-  } sql_lun;
+  } fa_sql_lun;
 

@@ -17,7 +17,7 @@
 //			FA_EXEC		- Run an SQL command as a one-off. i.e. PREPARE-STEP-FINALISE in one go
 //			FA_CLOSE	- Close Database
 //
-//	Keeps an index of database and command handles in sql_lun.h which should only be used by this routine.
+//	Keeps an index of database and command handles in fa_sql_lun.h which should only be used by this routine.
 //
 // Currently SQL commands are based on SQLITE3 but it should be possible to add compiler flags to support other SQL databases.
 //
@@ -38,56 +38,56 @@
 int fa_sql_handler(	const int iAction,
 					int iDb,
 					char *cSQL,
-					struct sql_db *spDb)
+					struct fa_sql_db *spDb)
   {
 	char cBuff[50];
-	struct sql_column *spSQLcol;	// used to step through the passed list of columns
-	struct sql_table *spSQLtable;	// used to step through the passed list of tables
-	char cTabName[SQL_TABLE_NAME_S0];	// local store for table name so we don't have to keep asking for it.
-	char cColName[SQL_COLUMN_NAME_S0];	// local store for column name so we don't have to keep asking for it.
+	struct fa_sql_column *spSQLcol;		// used to step through the passed list of columns
+	struct fa_sql_table *spSQLtable;	// used to step through the passed list of tables
+	char cTabName[FA_TABLE_NAME_S0];	// local store for table name so we don't have to keep asking for it.
+	char cColName[FA_COLUMN_NAME_S0];	// local store for column name so we don't have to keep asking for it.
 	int j, i = 0;
-	int ios = SQLITE_OK;			// SQLITE_OK = 0
-	int iCols;						// Number of columns in a row
+	int ios = SQLITE_OK;				// SQLITE_OK = 0
+	int iCols;							// Number of columns in a row
 
 
 
-    if (sql_lun.db[iDb] == 0 ||		// Auto Open database on 1st access
-			(iAction & FA_OPEN))	// Or requested open database
+    if (fa_sql_lun.db[iDb] == 0 ||		// Auto Open database on 1st access
+			(iAction & FA_OPEN))		// Or requested open database
 	  {
 		ut_debug("open");
 		snprintf(cBuff, 50, "/var/local/%s", spDb->cName);		//#TODO - set size and full path properly
 
-		ios=sqlite3_open(	cBuff,			// database filename
-				&sql_lun.db[iDb]);			// handle for database - used by other commands
+		ios=sqlite3_open(	cBuff,		// database filename
+				&fa_sql_lun.db[iDb]);	// handle for database - used by other commands
 		ut_check(ios == SQLITE_OK, "open: %d", ios);
 	  }
 
-	if (iAction & FA_FINALISE ||				// Close down a PREPAREd statement (else memory leak)
-		(!(iAction & FA_STEP) && sql_lun.row[iDb] != 0))		// Don't close down a PREPAREd statement if stepping
-	  {											// Cos of this tidy-up apps don't need to finalise
+	if (iAction & FA_FINALISE ||		// Close down a PREPAREd statement (else memory leak)
+		(!(iAction & FA_STEP) && fa_sql_lun.row[iDb] != 0))		// Don't close down a PREPAREd statement if stepping
+	  {									// Cos of this tidy-up apps don't need to finalise
 		ut_debug("fa_finalise");
-		ios=sqlite3_finalize(sql_lun.row[iDb]);		// statement handle (from FA_PREPARE) to finalise
+		ios=sqlite3_finalize(fa_sql_lun.row[iDb]);	// statement handle (from FA_PREPARE) to finalise
 		ut_check(ios == SQLITE_OK, "finalise");
-		sql_lun.row[iDb]=0;
+		fa_sql_lun.row[iDb]=0;
 	  }
 
-	if (iAction & FA_STEP)							// Step through rows from a previously prepared SELECT
+	if (iAction & FA_STEP)				// Step through rows from a previously prepared SELECT
 	  {
 		ut_debug("fa_step");
-		if ((ios=sqlite3_step(sql_lun.row[iDb])) == SQLITE_ROW)		// Row of data to process
+		if ((ios=sqlite3_step(fa_sql_lun.row[iDb])) == SQLITE_ROW)	// Row of data to process
 		  {
-			iCols=sqlite3_column_count(sql_lun.row[iDb]);		// how many columns in this row?
+			iCols=sqlite3_column_count(fa_sql_lun.row[iDb]);		// how many columns in this row?
 			ut_debug("cols: %d", iCols);
 
 			i=0;
-			while (i < iCols)						// Step through each column in his row
+			while (i < iCols)			// Step through each column in his row
 			  {
-				snprintf(	cTabName,				// What table is this column from?
-							SQL_TABLE_NAME_S0,
-							sqlite3_column_table_name(sql_lun.row[iDb], i));
+				snprintf(	cTabName,			// What table is this column from?
+							FA_TABLE_NAME_S0,
+							sqlite3_column_table_name(fa_sql_lun.row[iDb], i));
 
 				j=1;
-				spSQLtable=spDb->spTab;				// look for table name in the passed list of tables
+				spSQLtable=spDb->spTab;			// look for table name in the passed list of tables
 				while (strcmp(spSQLtable->cName, cTabName) != 0)
 				  {
 					spSQLtable++;
@@ -95,12 +95,12 @@ int fa_sql_handler(	const int iAction,
 					ut_error("table name not found:%s", cTabName);
 				  }
 
-				snprintf(	cColName,				// Found table so now find the column's name
-							SQL_COLUMN_NAME_S0,
-							sqlite3_column_origin_name(sql_lun.row[iDb], i));
+				snprintf(	cColName,			// Found table so now find the column's name
+							FA_COLUMN_NAME_S0,
+							sqlite3_column_origin_name(fa_sql_lun.row[iDb], i));
 				ut_debug("col name: %s", cColName);
 
-				spSQLcol=spSQLtable->spCol;			// look for column name in this table's list
+				spSQLcol=spSQLtable->spCol;		// look for column name in this table's list
 				j=1;
 				while (strcmp(spSQLcol->cName, cColName) != 0)
 				  {
@@ -111,45 +111,45 @@ int fa_sql_handler(	const int iAction,
 				ut_debug(	"matched with: %s type:%d",	spSQLcol->cName,
 							spSQLcol->iFlag);
 
-				if (spSQLcol->iFlag & SQL_COL_INT_B0)			// unpack an integer column?
+				if (spSQLcol->iFlag & FA_COL_INT_B0)		// unpack an integer column?
 					*(int *)spSQLcol->cPos=
-						sqlite3_column_int(sql_lun.row[iDb], i);
-				else if (spSQLcol->iFlag & SQL_COL_CHAR_B0)		// unpack a char/byte column?
-					snprintf(	spSQLcol->cPos,					//output column data to field data string
-								spSQLcol->iSize,				//limit size to max column size
-								"%c",							//unterninated string data
-								sqlite3_column_bytes(sql_lun.row[iDb], i));	//the column data
-				else											// or a string/blob column?
-					snprintf(	spSQLcol->cPos,					//output column data to field data string
-								spSQLcol->iSize,				//limit size to max column size
-								"%s",							//null terninated string data
-								(char *) sqlite3_column_blob(sql_lun.row[iDb], i));	//the column data
-					i++;										// next column
+						sqlite3_column_int(fa_sql_lun.row[iDb], i);
+				else if (spSQLcol->iFlag & FA_COL_CHAR_B0)	// unpack a char/byte column?
+					snprintf(	spSQLcol->cPos,				//output column data to field data string
+								spSQLcol->iSize,			//limit size to max column size
+								"%c",						//unterninated string data
+								sqlite3_column_bytes(fa_sql_lun.row[iDb], i));	//the column data
+				else										// or a string/blob column?
+					snprintf(	spSQLcol->cPos,				//output column data to field data string
+								spSQLcol->iSize,			//limit size to max column size
+								"%s",						//null terninated string data
+								(char *) sqlite3_column_blob(fa_sql_lun.row[iDb], i));	//the column data
+					i++;									// next column
 				}
-			ios=FA_OK_IV0;										// return a 0 if read a row ok
+			ios=FA_OK_IV0;						// return a 0 if read a row ok
 		  }
 		else
 		  {
-			ut_check(ios == SQLITE_DONE, "step %d", ios);		// if not done then bomb out to error:
-			ios=FA_NODATA_IV0;									// Using a common - no record found error
+			ut_check(ios == SQLITE_DONE, "step %d", ios);	// if not done then bomb out to error:
+			ios=FA_NODATA_IV0;								// Using a common - no record found error
 		  }
 	  }
 
-	else if (iAction & FA_PREPARE)					// Prepare a custom statement ready for FA_STEP'ing
+	else if (iAction & FA_PREPARE)				// Prepare a custom statement ready for FA_STEP'ing
 	  {
 		ut_debug("fa_prepare: %s", cSQL);
-		ios=sqlite3_prepare_v2(	sql_lun.db[iDb],	// database handle
-								cSQL,				// SQL statement to prepare (compile)
-								-1,					// Length of SQL command or up to 1st null if -1
-								&sql_lun.row[iDb],	// handle for prepared statement
-								0);					// pointer to unused statement (after null) if not null
+		ios=sqlite3_prepare_v2(	fa_sql_lun.db[iDb],		// database handle
+								cSQL,					// SQL statement to prepare (compile)
+								-1,						// Length of SQL command or up to 1st null if -1
+								&fa_sql_lun.row[iDb],	// handle for prepared statement
+								0);						// pointer to unused statement (after null) if not null
 		ut_check(ios == SQLITE_OK, "prepare: %d", ios);
 	  }
 
     else if (iAction & FA_EXEC)					// Execute a custom SQL statement as a one-off
 	  {											//		with no callback routine
 		ut_debug("fa_exec: %s", cSQL);
-		ios=sqlite3_exec(	sql_lun.db[iDb],	// database handle
+		ios=sqlite3_exec(	fa_sql_lun.db[iDb],	// database handle
 							cSQL,				// SQL command to prepare-step-finalise
 							0,					// callback function - if not null
 							0,					// 1st argument for callback function
@@ -158,7 +158,7 @@ int fa_sql_handler(	const int iAction,
 	  }
 
     else if (iAction & FA_CLOSE)				// Close database
-		sqlite3_close(sql_lun.db[iDb]);
+		sqlite3_close(fa_sql_lun.db[iDb]);
 
     else if (!(iAction & (FA_FINALISE+FA_OPEN)))	// Ignore as already dealt with above
       {
@@ -170,6 +170,6 @@ int fa_sql_handler(	const int iAction,
 
 
 error:
-	ut_error("%s", sqlite3_errmsg(sql_lun.db[iDb]));			// A more informative error description
+	ut_error("%s", sqlite3_errmsg(fa_sql_lun.db[iDb]));		// A more informative error description
 	return ios;
   }

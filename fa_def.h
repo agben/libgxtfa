@@ -4,7 +4,7 @@
 // These parameters are bitmaps that may be combined in various combinations to achieve a wide
 //	variety of commands for filehandlers to interpret.
 //
-//	GNU GPLv3 licence	GXT FA by Andrew Bennington 2015 [www.benningtons.net]
+//	GNU GPLv3 licence	libgxtfa by Andrew Bennington 2015 [www.benningtons.net]
 //
 //--------------------------------------------------------------
 
