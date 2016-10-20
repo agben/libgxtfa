@@ -11,7 +11,9 @@
 #ifndef __FA_SQL_DEF_INCLUDED__
 #define __FA_SQL_DEF_INCLUDED__
 
+#define	FA_PATHNAME_S0		50		// Limits size of full directory path names!
 #define	FA_FILENAME_S0		20		// Limits size of file or database names!
+#define	FA_FULLNAME_S0		FA_PATHNAME_S0 + FA_FILENAME_S0
 #define	FA_TABLE_NAME_S0	20		// Limits size of SQL table names!
 #define	FA_ALIAS_NAME_S0	10		// Limits size of aliases used in SQL scripts!
 #define	FA_COLUMN_NAME_S0	10		// Limits size of SQL column names!
@@ -36,12 +38,14 @@
 					// Definitions for each database
 struct fa_sql_db
   {
-    char	cName[FA_FILENAME_S0];			// null terminated file or database name (not full path)
+    char	szPath[FA_PATHNAME_S0];			// null terminated directory path name
+    char	szFile[FA_FILENAME_S0];			// null terminated file or database name (not full path)
     int		iTab;							// Number of tables in this database
     int		iColMax;						// Max number of columns found in any table in this database
     int		iKeyMax;						// Number of common keys defined for the SQL generator
+	int		iLun;							// Allocated index number for fa_sql_lun.h where db/statement handles are held
     struct 	fa_sql_table *spTab;			// pointer to start of sql_table array
-    char	cKey[FA_KEY_M0][FA_KEY_S0];		// null terminated SQL key string
+    char	szKey[FA_KEY_M0][FA_KEY_S0];	// null terminated SQL key string
   };
 
 					// Definitions for each database table
@@ -50,6 +54,7 @@ struct fa_sql_table
     char	cName[FA_TABLE_NAME_S0];	// null terminated SQL table name
     char	cAlias[FA_ALIAS_NAME_S0];	// null terminated SQL table alias name
     int		iCol;						// Column count per table
+	int		bField;						// bitmap of selected columns	#TODO will need to be an array for larger tables
     struct	fa_sql_column *spCol;		// pointer to start of sql_column array
   };
 
@@ -64,9 +69,9 @@ struct fa_sql_column
     int		iSize;						// Size of data to unpack - max column size
   };
 
-int fa_handler(const int, int*, struct fa_sql_db*, char*);				// for use in applications to pass file actions to libgxtfa
-int fa_sql_generator(const int, int*, struct fa_sql_db*, char*, char*);	// for building SQL scripts
+int fa_handler(const int, struct fa_sql_db*, char*);				// generic file/db handler
+int fa_sql_generator(const int, struct fa_sql_db*, char*, char*);	// for building SQL scripts
 int fa_sql_generator_key(char*, struct fa_sql_db*, int*, char*, int);	// for building SQL SELECT key scripts
-int fa_sql_handler(const int, int, char*, struct fa_sql_db*);			// for passing SQL scripts to the SQL engine
+int fa_sql_handler(const int, char*, struct fa_sql_db*);			// for passing SQL scripts to the SQL engine
 
 #endif

@@ -33,7 +33,7 @@
 #define	FA_STEP		0x00020000
 #define	FA_FINALISE	0x00040000
 #define	FA_EXEC		0x00080000
-//	spare		0x00100000
+#define	FA_INIT		0x00100000
 //	spare		0x00200000
 //	spare		0x00400000
 //	spare		0x00800000
@@ -49,8 +49,3 @@
 // Common error codes to allow storage agnostic error handling
 #define	FA_OK_IV0	0			// Universal all ok code
 #define	FA_NODATA_IV0	36		// Using the old openVMS definitions...
-
-
-// index for database and prepared statement handles, used for managing multiple db's and statements in a process
-#define	CE_MAIN_L0	25			// ce_main.db	Coding Ecosystem
-//#TODO replace preset LUNs with dymanically allocated file ID's

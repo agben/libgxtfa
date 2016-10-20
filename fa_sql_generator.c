@@ -2,10 +2,8 @@
 //
 // Generate SQL scripts based on a bitmap of 'actions' and a bitmap of tables/columns to work with
 //
-//	usage:	status = fa_sql_generator (action, fields, db, key, output)
+//	usage:	status = fa_sql_generator (action, db, key, output)
 //		where	action is a bitmap of filehandler commands - see fa_def.h
-//				fields is a pointer to an array of bitmaps, 1 per table (currently),
-//					with each field representing a column
 //				db is a structure pointer to database definition data
 //				key is a pointer to any SQL script passed, which will be used as a key descriptor
 //				output is a pointer to an output buffer containing the generated SQL script
@@ -30,22 +28,21 @@
 #define FALSE	0
 
 
-int fa_sql_generator(int iAction, int *ipField, struct fa_sql_db *spDb, char *cpPKey, char *cpO)
+int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cpO)
   {
     struct fa_sql_column *spCol;					// pointer to sql column definitions
     struct fa_sql_table *spTab;						// pointer to sql table definitions
 
     int iBuffMax = FA_BUFFER_S0;					// max buffer size
     int i, j;
-    char *cpKey = &spDb->cKey[iAction & FA_KEY_MASK][0];		// pointer to sql key definitions
+    char *cpKey = &spDb->szKey[iAction & FA_KEY_MASK][0];		// pointer to sql key definitions
 
 
     spTab=spDb->spTab;								// start pointing to 1st table in db
     i=0;
-    while (*ipField == 0)							// any fields requested from this table?
+    while (spTab->bField == 0)						// any fields requested from this table?
 	  {
 		spTab++;									// no, so next table
-		ipField++;									// and next field bitmap to check
 		ut_check((++i < spDb->iTab),"no fields");	// will jump to error: if exceeded db's table count
       }
 
@@ -57,7 +54,7 @@ int fa_sql_generator(int iAction, int *ipField, struct fa_sql_db *spDb, char *cp
 		cpO+=j;										// step through the output buffer
 		iBuffMax-=j;								// whilst reducing the remaining buffer space
 
-		if (*ipField == FA_ALL_COLS_B0)
+		if (spTab->bField == FA_ALL_COLS_B0)
 		  {
 			snprintf(cpO, iBuffMax, "*");
 			cpO++;
@@ -68,7 +65,7 @@ int fa_sql_generator(int iAction, int *ipField, struct fa_sql_db *spDb, char *cp
 			spCol=spTab->spCol;
 			for (i=0; i < spTab->iCol; i++)			// List columns to SELECT
 			  {
-				if ((*ipField>>i) & 1)
+				if ((spTab->bField>>i) & 1)
 				  {
 					j=snprintf(	cpO,
 								iBuffMax,
@@ -112,7 +109,7 @@ int fa_sql_generator(int iAction, int *ipField, struct fa_sql_db *spDb, char *cp
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if ((*ipField>>i) & 1)
+			if ((spTab->bField>>i) & 1)
 			  {
 				j=snprintf(cpO, iBuffMax, "%s=", spCol->cName);	// output list of selected field names
 				cpO+=j;
@@ -159,7 +156,7 @@ int fa_sql_generator(int iAction, int *ipField, struct fa_sql_db *spDb, char *cp
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if (((*ipField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
+			if (((spTab->bField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
 			  {									// Don't try writing to any auto-generated columns
 				j=snprintf(cpO, iBuffMax, "%s, ", spCol->cName);	// output list of selected field names
 				cpO+=j;
@@ -177,7 +174,7 @@ int fa_sql_generator(int iAction, int *ipField, struct fa_sql_db *spDb, char *cp
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if (((*ipField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
+			if (((spTab->bField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
 			  {								// Don't try writing to any auto-generated columns
 				if (spCol->iFlag & FA_COL_INT_B0)
 					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cPos);
