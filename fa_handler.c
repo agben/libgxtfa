@@ -53,6 +53,8 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 		cp=&szBuff[0];									// point back to the start ready for passing
 		if (!(iAction & FA_READ)) iAction=FA_EXEC;		// SQL script is prepared so now execute it
 	 }
+	else if (iAction & FA_INIT)							//intitalise libgxtfa when starting a process
+		for (i=0; i < FA_LUN_M0; fa_lun[i++].szFile[0]=0);
 
 	if (iAction & (FA_PREPARE+FA_FINALISE+FA_EXEC+FA_READ+FA_OPEN+FA_CLOSE))	// Pass these SQL commands straight through
 	 {
@@ -108,22 +110,18 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 						szBuff);					// Mark lun slot as used for this db
 		 }
 	 }
-	else if (iAction & FA_INIT)						//intitalise libgxtfa when starting a process
-	 {
-		for (i=0; i < FA_LUN_M0; fa_lun[i++].szFile[0]=0);
-	 }
 	else
-		ut_check(!(ios & FA_STEP), "unknown: %d", iAction);		// Ignore FA_STEP as dealt with below
+		ut_check(!(ios & (FA_STEP+FA_INIT)), "unknown: %d", iAction);		// Valid action passed?
 
 
-	if (iAction & FA_STEP)								// Step through rows from a previously prepared SELECT
+	if (iAction & FA_STEP)							// Step through rows from a previously prepared SELECT
 	 {
-		ios=fa_sql_handler(	FA_STEP,					// Action
-							0,							// not used
-							spDB);						// Field definitions
+		ios=fa_sql_handler(	FA_STEP,				// Action
+							0,						// not used
+							spDB);					// Field definitions
 		if (ios != FA_OK_IV0)
 			ut_check(	ios == FA_NODATA_IV0,
-						"step error %d", ios);			// Ignore no data found or end of row messages
+						"step error %d", ios);		// Ignore no data found or end of row messages
 	 }
 
 error:
