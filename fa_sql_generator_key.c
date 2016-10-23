@@ -28,6 +28,7 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
   {
     struct fa_sql_column *spCol;	// pointer to sql column definitions
     struct fa_sql_table *spTab;		// pointer to sql table definitions
+
     int i;
     int iLen = 0;				// length of data added to output string - for returning to calling program
     char *cp = cpKey;			// start at begining of key template
@@ -48,35 +49,35 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
 
 			i=0;
 			spTab=spDb->spTab;			// start pointing to 1st table in db
-			while (strncmp(spTab->cAlias, cp, iTabLen) != 0)	// Find the table using this alias
+			while (strncmp(spTab->sAlias, cp, iTabLen) != 0)	// Find the table using this alias
 			  {
 				spTab++;
 				ut_check((++i < spDb->iTab), "alias not found %s len:%d", cpKey, iTabLen);
 			  }
-			ut_debug("key:%s table:%s",cpKey, spTab->cName);
+			ut_debug("key:%s table:%s",cpKey, spTab->sName);
 			cp=cpColStart-1;					// return to where we were in the template string
 		  }
 		else if (*cp == ' ' && cpColStart > 0)	// end of column name?
 		  {
 			i=0;
 			spCol=spTab->spCol;					// start pointing to 1st column in this table
-			while (strncmp(spCol->cName, cpColStart, iColLen-1) != 0)	// Find the table using this alias
+			while (strncmp(spCol->sName, cpColStart, iColLen-1) != 0)	// Find the table using this alias
 			  {
 				spCol++;
 				ut_check((++i < spTab->iCol),
 				"column not found %s pos:%ld len:%d", cpKey, cpColStart-cpKey, iColLen-1);
 			  }
-			ut_debug("column:%s",spCol->cName);
+			ut_debug("column:%s",spCol->sName);
 			cpColStart = 0;						//ready for next column
 		  }
 		else if (*cp == '%')					// we should always have a table and column by now
 		  {
-			if (spCol->iFlag & FA_COL_INT_B0)
-			  i=snprintf(cpO, *iBuffMax, "%d", *(int *)spCol->cPos);
-			else if (spCol->iFlag & FA_COL_CHAR_B0)
-			  i=snprintf(cpO, *iBuffMax, "\"%c\"", *(spCol->cPos));
+			if (spCol->bmFlag & FA_COL_INT_B0)
+			  i=snprintf(cpO, *iBuffMax, "%d", *(int *)spCol->cpPos);
+			else if (spCol->bmFlag & FA_COL_CHAR_B0)
+			  i=snprintf(cpO, *iBuffMax, "\"%c\"", *(spCol->cpPos));
 			else
-			  i=snprintf(cpO, *iBuffMax, "\"%s\"", spCol->cPos);
+			  i=snprintf(cpO, *iBuffMax, "\"%s\"", spCol->cpPos);
 
 			cpO+=i;
 			*iBuffMax-=i;

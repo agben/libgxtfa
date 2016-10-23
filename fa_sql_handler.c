@@ -40,8 +40,9 @@ int fa_sql_handler(	const int iAction,
   {
 	struct fa_sql_column *spSQLcol;		// used to step through the passed list of columns
 	struct fa_sql_table *spSQLtable;	// used to step through the passed list of tables
-	char cTabName[FA_TABLE_NAME_S0];	// local store for table name so we don't have to keep asking for it.
-	char cColName[FA_COLUMN_NAME_S0];	// local store for column name so we don't have to keep asking for it.
+
+	char sTabName[FA_TABLE_NAME_S0];	// local store for table name so we don't have to keep asking for it.
+	char sColName[FA_COLUMN_NAME_S0];	// local store for column name so we don't have to keep asking for it.
 	int j, i = 0;
 	int ios = SQLITE_OK;				// SQLITE_OK = 0
 	int iCols;							// Number of columns in a row
@@ -75,45 +76,45 @@ int fa_sql_handler(	const int iAction,
 			i=0;
 			while (i < iCols)						// Step through each column in his row
 			  {
-				snprintf(	cTabName,				// What table is this column from?
+				snprintf(	sTabName,				// What table is this column from?
 							FA_TABLE_NAME_S0,
 							sqlite3_column_table_name(fa_lun[spDB->iLun].row, i));
 
 				j=1;
 				spSQLtable=spDB->spTab;				// look for table name in the passed list of tables
-				while (strcmp(spSQLtable->cName, cTabName) != 0)
+				while (strcmp(spSQLtable->sName, sTabName) != 0)
 				  {
 					spSQLtable++;
 					if (++j > spDB->iTab)
-					ut_error("table name not found:%s", cTabName);
+					ut_error("table name not found:%s", sTabName);
 				  }
 
-				snprintf(	cColName,				// Found table so now find the column's name
+				snprintf(	sColName,				// Found table so now find the column's name
 							FA_COLUMN_NAME_S0,
 							sqlite3_column_origin_name(fa_lun[spDB->iLun].row, i));
-				ut_debug("col name: %s", cColName);
+				ut_debug("col name: %s", sColName);
 
 				spSQLcol=spSQLtable->spCol;			// look for column name in this table's list
 				j=1;
-				while (strcmp(spSQLcol->cName, cColName) != 0)
+				while (strcmp(spSQLcol->sName, sColName) != 0)
 				  {
 					spSQLcol++;
-					if (++j > spDB->iColMax) ut_error("column name not found:%s", cColName);
+					if (++j > spDB->iColMax) ut_error("column name not found:%s", sColName);
 				  }
 
-				ut_debug(	"matched with: %s type:%d",	spSQLcol->cName,
-							spSQLcol->iFlag);
+				ut_debug(	"matched with: %s type:%d",	spSQLcol->sName,
+							spSQLcol->bmFlag);
 
-				if (spSQLcol->iFlag & FA_COL_INT_B0)			// unpack an integer column?
-					*(int *)spSQLcol->cPos=
+				if (spSQLcol->bmFlag & FA_COL_INT_B0)			// unpack an integer column?
+					*(int *)spSQLcol->cpPos=
 						sqlite3_column_int(fa_lun[spDB->iLun].row, i);
-				else if (spSQLcol->iFlag & FA_COL_CHAR_B0)		// unpack a char/byte column?
-					snprintf(	spSQLcol->cPos,					//output column data to field data string
+				else if (spSQLcol->bmFlag & FA_COL_CHAR_B0)		// unpack a char/byte column?
+					snprintf(	spSQLcol->cpPos,				//output column data to field data string
 								spSQLcol->iSize,				//limit size to max column size
 								"%c",							//unterninated string data
 								sqlite3_column_bytes(fa_lun[spDB->iLun].row, i));	//the column data
 				else											// or a string/blob column?
-					snprintf(	spSQLcol->cPos,					//output column data to field data string
+					snprintf(	spSQLcol->cpPos,				//output column data to field data string
 								spSQLcol->iSize,				//limit size to max column size
 								"%s",							//null terninated string data
 								(char *) sqlite3_column_blob(fa_lun[spDB->iLun].row, i));	//the column data

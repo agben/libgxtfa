@@ -17,7 +17,7 @@
 
 struct
   {
-	char szFile[FA_FULLNAME_S0];
+	char sFile[FA_FULLNAME_S0];
 	sqlite3 *db;
 	sqlite3_stmt *row;
   } fa_lun[FA_LUN_M0];

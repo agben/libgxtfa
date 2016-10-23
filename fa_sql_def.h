@@ -38,32 +38,32 @@
 					// Definitions for each database
 struct fa_sql_db
   {
-    char	szPath[FA_PATHNAME_S0];			// null terminated directory path name
-    char	szFile[FA_FILENAME_S0];			// null terminated file or database name (not full path)
+    char	sPath[FA_PATHNAME_S0];			// null terminated directory path name
+    char	sFile[FA_FILENAME_S0];			// null terminated file or database name (not full path)
     int		iTab;							// Number of tables in this database
     int		iColMax;						// Max number of columns found in any table in this database
     int		iKeyMax;						// Number of common keys defined for the SQL generator
 	int		iLun;							// Allocated index number for fa_sql_lun.h where db/statement handles are held
     struct 	fa_sql_table *spTab;			// pointer to start of sql_table array
-    char	szKey[FA_KEY_M0][FA_KEY_S0];	// null terminated SQL key string
+    char	sKey[FA_KEY_M0][FA_KEY_S0];		// null terminated SQL key string
   };
 
 					// Definitions for each database table
 struct fa_sql_table
   {
-    char	cName[FA_TABLE_NAME_S0];	// null terminated SQL table name
-    char	cAlias[FA_ALIAS_NAME_S0];	// null terminated SQL table alias name
+    char	sName[FA_TABLE_NAME_S0];	// null terminated SQL table name
+    char	sAlias[FA_ALIAS_NAME_S0];	// null terminated SQL table alias name
     int		iCol;						// Column count per table
-	int		bField;						// bitmap of selected columns	#TODO will need to be an array for larger tables
+	int		bmField;					// bitmap of selected columns	#TODO will need to be an array for larger tables
     struct	fa_sql_column *spCol;		// pointer to start of sql_column array
   };
 
 					// Definitions for each database table column
 struct fa_sql_column
   {
-    char	cName[FA_COLUMN_NAME_S0];	// null terminated SQL column name
-    int		iFlag;						// bitmap of column options
-    char	*cPos;						// Where to unpack data. Note: pointers to char are guaranteed to be
+    char	sName[FA_COLUMN_NAME_S0];	// null terminated SQL column name
+    int		bmFlag;						// bitmap of column options
+    char	*cpPos;						// Where to unpack data. Note: pointers to char are guaranteed to be
 										//	convertable to other pointer types - so we can cast these to
 										//	 (int *) when necessary
     int		iSize;						// Size of data to unpack - max column size

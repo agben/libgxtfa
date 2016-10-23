@@ -33,10 +33,10 @@
 
 int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 {
-	char szBuff[FA_BUFFER_S0];		// SQL command input buffer	#TODO - use malloc and a common SQL size
+	char sBuff[FA_BUFFER_S0];		// SQL command input buffer	#TODO - use malloc and a common SQL size
 	int i;
 	int ios = 0;
-	char *cp = &szBuff[0];
+	char *cp = &sBuff[0];
 
 
 	ut_debug("action:%x", iAction);
@@ -50,11 +50,11 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 									cpSQL,				// pass any SQL script fed into the filehandler
 									cp) == 0,			// pointer to output buffer for generated scipt
 				"SQL gen fail");						// will jump to error: if a problem
-		cp=&szBuff[0];									// point back to the start ready for passing
+		cp=&sBuff[0];									// point back to the start ready for passing
 		if (!(iAction & FA_READ)) iAction=FA_EXEC;		// SQL script is prepared so now execute it
 	 }
 	else if (iAction & FA_INIT)							//intitalise libgxtfa when starting a process
-		for (i=0; i < FA_LUN_M0; fa_lun[i++].szFile[0]=0);
+		for (i=0; i < FA_LUN_M0; fa_lun[i++].sFile[0]=0);
 
 	if (iAction & (FA_PREPARE+FA_FINALISE+FA_EXEC+FA_READ+FA_OPEN+FA_CLOSE))	// Pass these SQL commands straight through
 	 {
@@ -64,22 +64,22 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 		 {
 			spDB->iLun=-1;								// mark lun as being allocated
 
-			snprintf(	szBuff,
+			snprintf(	sBuff,
 						FA_FULLNAME_S0,
 						"%s%s",
-						spDB->szPath,					// path name
-						spDB->szFile);					// file name
+						spDB->sPath,					// path name
+						spDB->sFile);					// file name
 
 			i=0;
 			while (i < FA_LUN_M0)
 			 {
-				if (strncmp(fa_lun[i].szFile, szBuff, FA_FULLNAME_S0) == 0)
+				if (strncmp(fa_lun[i].sFile, sBuff, FA_FULLNAME_S0) == 0)
 				  {
 					spDB->iLun=i;				// file already open so re-instate lun
 					i=0;						// mark as no error (ok to continue)
-					ut_error("file already open %s", szBuff);	// but flag the issue anyhow
+					ut_error("file already open %s", sBuff);	// but flag the issue anyhow
 				  }
-				else if (spDB->iLun < 0 && fa_lun[i].szFile[0] == 0)
+				else if (spDB->iLun < 0 && fa_lun[i].sFile[0] == 0)
 					spDB->iLun=i;				// remember the 1st empty lun slot
 				i++;
 			 }
@@ -99,15 +99,15 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 
 		if (iAction & FA_CLOSE)						// Closed file/db so release lun
 		 {
-			fa_lun[spDB->iLun].szFile[0]=0;			// free lun slot for re-use
+			fa_lun[spDB->iLun].sFile[0]=0;			// free lun slot for re-use
 			spDB->iLun=0;							// clear lun in db definitions
 		 }
 		else if (iAction & FA_OPEN)
 		 {
-			snprintf(	fa_lun[spDB->iLun].szFile,
+			snprintf(	fa_lun[spDB->iLun].sFile,
 						FA_FULLNAME_S0,
 						"%s",
-						szBuff);					// Mark lun slot as used for this db
+						sBuff);						// Mark lun slot as used for this db
 		 }
 	 }
 	else

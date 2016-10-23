@@ -35,12 +35,12 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 
     int iBuffMax = FA_BUFFER_S0;					// max buffer size
     int i, j;
-    char *cpKey = &spDb->szKey[iAction & FA_KEY_MASK][0];		// pointer to sql key definitions
+    char *cpKey = &spDb->sKey[iAction & FA_KEY_MASK][0];		// pointer to sql key definitions
 
 
     spTab=spDb->spTab;								// start pointing to 1st table in db
     i=0;
-    while (spTab->bField == 0)						// any fields requested from this table?
+    while (spTab->bmField == 0)						// any fields requested from this table?
 	  {
 		spTab++;									// no, so next table
 		ut_check((++i < spDb->iTab),"no fields");	// will jump to error: if exceeded db's table count
@@ -54,7 +54,7 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 		cpO+=j;										// step through the output buffer
 		iBuffMax-=j;								// whilst reducing the remaining buffer space
 
-		if (spTab->bField == FA_ALL_COLS_B0)
+		if (spTab->bmField == FA_ALL_COLS_B0)
 		  {
 			snprintf(cpO, iBuffMax, "*");
 			cpO++;
@@ -65,13 +65,13 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 			spCol=spTab->spCol;
 			for (i=0; i < spTab->iCol; i++)			// List columns to SELECT
 			  {
-				if ((spTab->bField>>i) & 1)
+				if ((spTab->bmField>>i) & 1)
 				  {
 					j=snprintf(	cpO,
 								iBuffMax,
 								"%s.%s, ",
-								spTab->cAlias,		// Table alias
-								spCol->cName);		// Column name
+								spTab->sAlias,		// Table alias
+								spCol->sName);		// Column name
 					cpO+=j;
 					iBuffMax-=j;
 				  }
@@ -84,8 +84,8 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 		j=snprintf(	cpO,
 					iBuffMax,
 					" FROM %s AS %s WHERE ",
-					spTab->cName,
-					spTab->cAlias);
+					spTab->sName,
+					spTab->sAlias);
 		cpO+=j;
 		iBuffMax-=j;
 
@@ -102,24 +102,24 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 
 	else if (iAction & FA_UPDATE)					// UPDATE a row in the database
 	  {												// #TODO may be better to update changed fields only?
-		j=snprintf(cpO, iBuffMax, "UPDATE %s SET ", spTab->cName);
+		j=snprintf(cpO, iBuffMax, "UPDATE %s SET ", spTab->sName);
 		cpO+=j;										// step through the output buffer
 		iBuffMax-=j;								// whilst reducing the remaining buffer space
 
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if ((spTab->bField>>i) & 1)
+			if ((spTab->bmField>>i) & 1)
 			  {
-				j=snprintf(cpO, iBuffMax, "%s=", spCol->cName);	// output list of selected field names
+				j=snprintf(cpO, iBuffMax, "%s=", spCol->sName);	// output list of selected field names
 				cpO+=j;
 				iBuffMax-=j;
-				if (spCol->iFlag & FA_COL_INT_B0)			// integer data
-					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cPos);
-				else if (spCol->iFlag & FA_COL_CHAR_B0)		// single char/byte data
-					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cPos));
+				if (spCol->bmFlag & FA_COL_INT_B0)			// integer data
+					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cpPos);
+				else if (spCol->bmFlag & FA_COL_CHAR_B0)		// single char/byte data
+					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cpPos));
 				else										// else string/blob data
-					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cPos);
+					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cpPos);
 
 				cpO+=j;
 				iBuffMax-=j;
@@ -149,16 +149,16 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 
 	else if (iAction & FA_WRITE)				// INSERT a row into the database
       {
-		j=snprintf(cpO, iBuffMax, "INSERT INTO %s (", spTab->cName);
+		j=snprintf(cpO, iBuffMax, "INSERT INTO %s (", spTab->sName);
 		cpO+=j;									// step through the output buffer
 		iBuffMax-=j;							// whilst reducing the remaining buffer space
 
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if (((spTab->bField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
+			if (((spTab->bmField>>i) & 1) && !(spCol->bmFlag & FA_COL_AUTO_B0))
 			  {									// Don't try writing to any auto-generated columns
-				j=snprintf(cpO, iBuffMax, "%s, ", spCol->cName);	// output list of selected field names
+				j=snprintf(cpO, iBuffMax, "%s, ", spCol->sName);	// output list of selected field names
 				cpO+=j;
 				iBuffMax-=j;
 			  }
@@ -174,14 +174,14 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if (((spTab->bField>>i) & 1) && !(spCol->iFlag & FA_COL_AUTO_B0))
+			if (((spTab->bmField>>i) & 1) && !(spCol->bmFlag & FA_COL_AUTO_B0))
 			  {								// Don't try writing to any auto-generated columns
-				if (spCol->iFlag & FA_COL_INT_B0)
-					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cPos);
-				else if (spCol->iFlag & FA_COL_CHAR_B0)
-					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cPos));
+				if (spCol->bmFlag & FA_COL_INT_B0)
+					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cpPos);
+				else if (spCol->bmFlag & FA_COL_CHAR_B0)
+					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cpPos));
 				else
-					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cPos);
+					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cpPos);
 
 				cpO+=j;
 				iBuffMax-=j;
@@ -199,7 +199,7 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 	  {
 		j=snprintf(	cpO,
 					iBuffMax,
-					"DELETE FROM %s WHERE ", spTab->cName);
+					"DELETE FROM %s WHERE ", spTab->sName);
 		cpO+=j;
 		iBuffMax-=j;
 
