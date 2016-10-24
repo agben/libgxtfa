@@ -34,9 +34,9 @@
 int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 {
 	char sBuff[FA_BUFFER_S0];		// SQL command input buffer	#TODO - use malloc and a common SQL size
+	char *cp = &sBuff[0];
 	int i;
 	int ios = 0;
-	char *cp = &sBuff[0];
 
 
 	ut_debug("action:%x", iAction);
@@ -58,17 +58,15 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 
 	if (iAction & (FA_PREPARE+FA_FINALISE+FA_EXEC+FA_READ+FA_OPEN+FA_CLOSE))	// Pass these SQL commands straight through
 	 {
-		if (iAction & FA_READ)							// FA_READ will cause a PREPARE followed by a STEP
-			i=FA_PREPARE;
-		else if (iAction & FA_OPEN)						// Allocate a lun slot for db and transaction handles
-		 {
-			spDB->iLun=-1;								// mark lun as being allocated
+		if (iAction & FA_OPEN)						// Allocate a lun slot for db and transaction handles
+		  {
+			spDB->iLun=-1;							// mark lun as being allocated
 
 			snprintf(	sBuff,
 						FA_FULLNAME_S0,
 						"%s%s",
-						spDB->sPath,					// path name
-						spDB->sFile);					// file name
+						spDB->sPath,				// path name
+						spDB->sFile);				// file name
 
 			i=0;
 			while (i < FA_LUN_M0)
@@ -86,7 +84,10 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 
 			ut_check(	spDB->iLun >= 0,		// Room for another open file?
 						"lun slots full");
-		 }
+		  }
+
+		if (iAction & FA_READ)				// FA_READ will cause a PREPARE followed by a STEP
+			i=FA_PREPARE;
 		else
 			i=iAction;
 

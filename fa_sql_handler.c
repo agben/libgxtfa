@@ -28,6 +28,8 @@
 #include <stdio.h>			//standard I/O
 #include <string.h>			//string functions such as strcmp
 
+
+#include <ce_main.h>			//filehandler actions
 #include <fa_def.h>			//filehandler actions
 #include <fa_sql_def.h>		//format for holding details of any SQL database to enable unpacking of data
 #include <fa_sql_lun.h>		//table of database and prepared command handles
@@ -108,18 +110,19 @@ int fa_sql_handler(	const int iAction,
 				if (spSQLcol->bmFlag & FA_COL_INT_B0)			// unpack an integer column?
 					*(int *)spSQLcol->cpPos=
 						sqlite3_column_int(fa_lun[spDB->iLun].row, i);
+
 				else if (spSQLcol->bmFlag & FA_COL_CHAR_B0)		// unpack a char/byte column?
-					snprintf(	spSQLcol->cpPos,				//output column data to field data string
-								spSQLcol->iSize,				//limit size to max column size
-								"%c",							//unterninated string data
-								sqlite3_column_bytes(fa_lun[spDB->iLun].row, i));	//the column data
+					memcpy(	spSQLcol->cpPos,
+							(char *) sqlite3_column_blob(fa_lun[spDB->iLun].row, i),
+							FA_FIELD_CHAR_S0);					// copy char with no trailing null
+
 				else											// or a string/blob column?
 					snprintf(	spSQLcol->cpPos,				//output column data to field data string
 								spSQLcol->iSize,				//limit size to max column size
 								"%s",							//null terninated string data
 								(char *) sqlite3_column_blob(fa_lun[spDB->iLun].row, i));	//the column data
-					i++;										// next column
-				}
+				i++;											// next column
+			  }
 			ios=FA_OK_IV0;										// return a 0 if read a row ok
 		  }
 		else
@@ -154,10 +157,10 @@ int fa_sql_handler(	const int iAction,
     else if (iAction & FA_CLOSE)				// Close database
 		sqlite3_close(fa_lun[spDB->iLun].db);
 
-    else if (!(iAction & (FA_FINALISE+FA_OPEN)))	// Ignore as already dealt with above
-      {
-		ut_error("unknown: %d", iAction);
-		ios=-1;									// Unknown command passed?
+	else if (!(iAction & (FA_FINALISE+FA_OPEN)))	// Ignore as already dealt with above
+	  {
+		ut_error("unknown: %x", iAction);
+		ios=-1;										// Unknown command passed?
 	  }
 
 	return ios;
