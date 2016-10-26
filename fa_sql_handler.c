@@ -29,10 +29,10 @@
 #include <string.h>			//string functions such as strcmp
 
 
-#include <ce_main.h>			//filehandler actions
+//#include <ce_main.h>		//filehandler actions
 #include <fa_def.h>			//filehandler actions
+#include <fa_lun.h>			//table of file/database and prepared command handles
 #include <fa_sql_def.h>		//format for holding details of any SQL database to enable unpacking of data
-#include <fa_sql_lun.h>		//table of database and prepared command handles
 #include <ut_error.h>		//error and debug functions
 
 
