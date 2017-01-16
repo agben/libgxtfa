@@ -62,6 +62,15 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 		  }
 		else
 		  {
+			if (iAction & FA_DISTINCT)				// SELECT DISTINCT i.e. only return distinct (different) values
+			  {
+				j=snprintf(	cpO,
+							iBuffMax,
+							"DISTINCT ");
+				cpO+=j;
+				iBuffMax-=j;
+			  }
+
 			spCol=spTab->spCol;
 			for (i=0; i < spTab->iCol; i++)			// List columns to SELECT
 			  {

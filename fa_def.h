@@ -30,14 +30,16 @@
 #define	FA_DELETE	0x00002000
 //	spare		0x00004000
 //	spare		0x00008000
+
 #define	FA_PREPARE	0x00010000		// Common SQL actions
 #define	FA_STEP		0x00020000
 #define	FA_FINALISE	0x00040000
 #define	FA_EXEC		0x00080000
 #define	FA_INIT		0x00100000
-//	spare		0x00200000
+#define	FA_DISTINCT	0x00200000
 //	spare		0x00400000
 //	spare		0x00800000
+
 #define	FA_LINK		0x01000000		// Filehandler defined actions
 #define	FA_PURGE	0x02000000
 //	spare		0x04000000
