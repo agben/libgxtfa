@@ -14,6 +14,7 @@
 #define	FA_KEY3		0x00000003
 #define	FA_KEY4		0x00000004
 #define	FA_KEY5		0x00000005
+#define	FA_KEY6		0x00000006
 //	reserved	0x00000008
 //	reserved	0x00000010
 //	reserved	0x00000020
@@ -37,8 +38,8 @@
 //	spare		0x00200000
 //	spare		0x00400000
 //	spare		0x00800000
-//	spare		0x01000000
-//	spare		0x02000000
+#define	FA_LINK		0x01000000		// Filehandler defined actions
+#define	FA_PURGE	0x02000000
 //	spare		0x04000000
 //	spare		0x08000000
 //	spare		0x10000000

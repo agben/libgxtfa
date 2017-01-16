@@ -75,9 +75,11 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
 			if (spCol->bmFlag & FA_COL_INT_B0)
 			  i=snprintf(cpO, *iBuffMax, "%d", *(int *)spCol->cpPos);
 			else if (spCol->bmFlag & FA_COL_CHAR_B0)
-			  i=snprintf(cpO, *iBuffMax, "\"%c\"", *(spCol->cpPos));
+			  i=snprintf(cpO, *iBuffMax, "\'%c\'", *(spCol->cpPos));
+//			  i=snprintf(cpO, *iBuffMax, "\"%c\"", *(spCol->cpPos));
 			else
-			  i=snprintf(cpO, *iBuffMax, "\"%s\"", spCol->cpPos);
+			  i=snprintf(cpO, *iBuffMax, "\'%s\'", spCol->cpPos);
+//			  i=snprintf(cpO, *iBuffMax, "\"%s\"", spCol->cpPos);
 
 			cpO+=i;
 			*iBuffMax-=i;
