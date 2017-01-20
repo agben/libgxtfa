@@ -76,10 +76,8 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
 			  i=snprintf(cpO, *iBuffMax, "%d", *(int *)spCol->cpPos);
 			else if (spCol->bmFlag & FA_COL_CHAR_B0)
 			  i=snprintf(cpO, *iBuffMax, "\'%c\'", *(spCol->cpPos));
-//			  i=snprintf(cpO, *iBuffMax, "\"%c\"", *(spCol->cpPos));
 			else
 			  i=snprintf(cpO, *iBuffMax, "\'%s\'", spCol->cpPos);
-//			  i=snprintf(cpO, *iBuffMax, "\"%s\"", spCol->cpPos);
 
 			cpO+=i;
 			*iBuffMax-=i;
@@ -109,7 +107,7 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
 		else
 			cp++;							// buffer full so avoid loop
 
-		ut_debug("cp:%x cpO:%x cpO:%c%c%c%c%c%c%c", (int)cp, (int)cpO, cp2[0],cp2[1],cp2[2],cp2[3],cp2[4],cp2[5],cp2[6]);
+//		ut_debug("cp:%x cpO:%x cpO:%c%c%c%c%c%c%c", (int)cp, (int)cpO, cp2[0],cp2[1],cp2[2],cp2[3],cp2[4],cp2[5],cp2[6]);
 
 	  }
 

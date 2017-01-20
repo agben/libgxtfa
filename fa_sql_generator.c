@@ -126,9 +126,9 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 				if (spCol->bmFlag & FA_COL_INT_B0)			// integer data
 					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cpPos);
 				else if (spCol->bmFlag & FA_COL_CHAR_B0)		// single char/byte data
-					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cpPos));
+					j=snprintf(cpO, iBuffMax, "\'%c\', ", *(spCol->cpPos));
 				else										// else string/blob data
-					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cpPos);
+					j=snprintf(cpO, iBuffMax, "\'%s\', ", spCol->cpPos);
 
 				cpO+=j;
 				iBuffMax-=j;
@@ -188,9 +188,9 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 				if (spCol->bmFlag & FA_COL_INT_B0)
 					j=snprintf(cpO, iBuffMax, "%d, ", *(int *)spCol->cpPos);
 				else if (spCol->bmFlag & FA_COL_CHAR_B0)
-					j=snprintf(cpO, iBuffMax, "\"%c\", ", *(spCol->cpPos));
+					j=snprintf(cpO, iBuffMax, "\'%c\', ", *(spCol->cpPos));
 				else
-					j=snprintf(cpO, iBuffMax, "\"%s\", ", spCol->cpPos);
+					j=snprintf(cpO, iBuffMax, "\'%s\', ", spCol->cpPos);
 
 				cpO+=j;
 				iBuffMax-=j;
