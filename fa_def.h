@@ -52,3 +52,6 @@
 // Common error codes to allow storage agnostic error handling
 #define	FA_OK_IV0	0			// Universal all ok code
 #define	FA_NODATA_IV0	36		// Using the old openVMS definitions...
+
+// Column/field selections
+#define	FA_ALL_COLS_B0	0xFFFFFFFF	// Bitmap to indicate all columns are required from a SELECT

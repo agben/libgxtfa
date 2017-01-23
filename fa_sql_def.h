@@ -33,8 +33,6 @@
 
 #define	FA_BUFFER_S0	500			// Max size of buffers to hold SQL scripts
 
-#define	FA_ALL_COLS_B0	0xFFFFFFFF	// Bitmap to indicate all columns are required from a SELECT
-
 					// Definitions for each database
 struct fa_sql_db
   {
