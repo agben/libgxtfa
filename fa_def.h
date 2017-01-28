@@ -42,7 +42,7 @@
 
 #define	FA_LINK		0x01000000		// Filehandler defined actions
 #define	FA_PURGE	0x02000000
-//	spare		0x04000000
+#define	FA_ADD		0x04000000
 //	spare		0x08000000
 //	spare		0x10000000
 //	spare		0x20000000
