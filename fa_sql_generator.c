@@ -1,6 +1,6 @@
 //--------------------------------------------------------------
 //
-// Generate SQL scripts based on a bitmap of 'actions' and a bitmap of tables/columns to work with
+// Generate SQL scripts based on a bitmap of actions and a bitmap of tables/columns to work with
 //
 //	usage:	status = fa_sql_generator (action, db, key, output)
 //		where	action is a bitmap of filehandler commands - see fa_def.h

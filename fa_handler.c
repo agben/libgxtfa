@@ -54,7 +54,11 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 		if (!(iAction & FA_READ)) iAction=FA_EXEC;		// SQL script is prepared so now execute it
 	 }
 	else if (iAction & FA_INIT)							//intitalise libgxtfa when starting a process
-		for (i=0; i < FA_LUN_M0; fa_lun[i++].sFile[0]=0);
+		for (i=0; i < FA_LUN_M0; i++)
+		  {
+			fa_lun[i].sFile[0]=0;
+			fa_lun[i].db=0;
+		  }
 
 	if (iAction & (FA_PREPARE+FA_FINALISE+FA_EXEC+FA_READ+FA_OPEN+FA_CLOSE))	// Pass these SQL commands straight through
 	 {
@@ -101,6 +105,7 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 		if (iAction & FA_CLOSE)						// Closed file/db so release lun
 		 {
 			fa_lun[spDB->iLun].sFile[0]=0;			// free lun slot for re-use
+			fa_lun[spDB->iLun].db=0;				// drop db handle
 			spDB->iLun=0;							// clear lun in db definitions
 		 }
 		else if (iAction & FA_OPEN)

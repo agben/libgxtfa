@@ -22,3 +22,5 @@ struct
 	sqlite3_stmt *row;
   } fa_lun[FA_LUN_M0];
 
+// #TODO should prepare statements at start-up and re-use them with sqlite3_bind and reset.
+//	they could then replace the use of FA_KEY% in the filehandler? Also then not necessary to strip quotes from saved text.

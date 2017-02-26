@@ -154,8 +154,11 @@ int fa_sql_handler(	const int iAction,
 	  }
 
     else if (iAction & FA_CLOSE)				// Close database
-		sqlite3_close(fa_lun[spDB->iLun].db);
-
+	  {
+	    if (spDB->iLun > 0)						// check db is open
+			if (fa_lun[spDB->iLun].db > 0)
+				sqlite3_close(fa_lun[spDB->iLun].db);
+	  }
 	else if (!(iAction & (FA_FINALISE+FA_OPEN)))	// Ignore as already dealt with above
 	  {
 		ut_error("unknown: %x", iAction);
