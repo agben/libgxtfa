@@ -77,22 +77,33 @@ int fa_sql_handler(	const int iAction,
 			i=0;
 			while (i < iCols)						// Step through each column in his row
 			  {
-				snprintf(	sTabName,				// What table is this column from?
-							FA_TABLE_NAME_S0,
-							sqlite3_column_table_name(fa_lun[spDB->iLun].row, i));
-
-				j=1;
-				spSQLtable=spDB->spTab;				// look for table name in the passed list of tables
-				while (strcmp(spSQLtable->sName, sTabName) != 0)
+				if (iAction & FA_COUNT)				// counts don't return original table/column names
 				  {
-					spSQLtable++;
-					if (++j > spDB->iTab)
-					ut_error("table name not found:%s", sTabName);
-				  }
+					spSQLtable=spDB->spTab;			// So counter meta fields are added to the list of columns in the 1st table
 
-				snprintf(	sColName,				// Found table so now find the column's name
+					snprintf(sColName,				// Get column name from the counter alias used
 							FA_COLUMN_NAME_S0,
-							sqlite3_column_origin_name(fa_lun[spDB->iLun].row, i));
+							sqlite3_column_name(fa_lun[spDB->iLun].row, i));
+				  }
+				else
+				  {
+					snprintf(	sTabName,			// What table is this column from?
+								FA_TABLE_NAME_S0,
+								sqlite3_column_table_name(fa_lun[spDB->iLun].row, i));
+
+					j=1;
+					spSQLtable=spDB->spTab;			// look for table name in the passed list of tables
+					while (strcmp(spSQLtable->sName, sTabName) != 0)
+					  {
+						spSQLtable++;
+						if (++j > spDB->iTab)
+						ut_error("table name not found:%s", sTabName);
+					  }
+
+					snprintf(	sColName,			// Found table so now find the column's name
+								FA_COLUMN_NAME_S0,
+								sqlite3_column_origin_name(fa_lun[spDB->iLun].row, i));
+				  }
 				ut_debug("col name: %s", sColName);
 
 				spSQLcol=spSQLtable->spCol;			// look for column name in this table's list

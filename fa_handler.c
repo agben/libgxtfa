@@ -117,12 +117,14 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 		 }
 	 }
 	else
-		ut_check(!(ios & (FA_STEP+FA_INIT)), "unknown: %d", iAction);		// Valid action passed?
+		ut_check((iAction & (FA_STEP+FA_INIT)), "unknown: %d", iAction);		// Valid action passed?
 
 
 	if (iAction & FA_STEP)							// Step through rows from a previously prepared SELECT
 	 {
-		ios=fa_sql_handler(	FA_STEP,				// Action
+		i=FA_STEP;
+		if (iAction & FA_COUNT) i+=FA_COUNT;		// Step needs to know if expecting a counter meta column
+		ios=fa_sql_handler(	i,						// Action
 							0,						// not used
 							spDB);					// Field definitions
 		if (ios != FA_OK_IV0)

@@ -48,13 +48,21 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 
 //    ut_debug("table:%d, fields:%x", i, *ipField);
 
-	if (iAction & FA_READ)							// Prepare SQL to SELECT from db
+	if (iAction & FA_READ)						// Prepare SQL to SELECT from db
 	  {
 		j=snprintf(cpO, iBuffMax, "SELECT ");
-		cpO+=j;										// step through the output buffer
-		iBuffMax-=j;								// whilst reducing the remaining buffer space
+		cpO+=j;									// step through the output buffer
+		iBuffMax-=j;							// whilst reducing the remaining buffer space
 
-		if (spTab->bmField == FA_ALL_COLS_B0)
+		if (iAction & FA_COUNT)					// SELECT COUNT(*) i.e. count matching rows
+		  {
+			j=snprintf(	cpO,
+						iBuffMax,
+						"COUNT(*) AS icount ");
+			cpO+=j;
+			iBuffMax-=j;
+		  }
+		else if (spTab->bmField == FA_ALL_COLS_B0)
 		  {
 			snprintf(cpO, iBuffMax, "*");
 			cpO++;
