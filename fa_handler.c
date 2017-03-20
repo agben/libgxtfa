@@ -14,6 +14,7 @@
 //		FA_UPDATE	- Prepare an UPDATE command to update selected fields in the database
 //		FA_PREPARE	- An adhoc query so pass the SQL instruction on to the sql_handler
 //		FA_STEP		- Return the next row of data from an FA_READ
+//		FA_RESET	- Reset a prepared statement, ready for stepping through again
 //		FA_FINALISE	- Tidily close a SELECT-STEP-FINALISE loop - other commands will also trigger this
 //		FA_EXEC		- Pass on a passed SQL instruction for execution in a single SELECT-STEP-FINALISE action
 //		FA_DELETE	- Prepare a DELETE command to remove a row from the database
@@ -60,7 +61,8 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 			fa_lun[i].db=0;
 		  }
 
-	if (iAction & (FA_PREPARE+FA_FINALISE+FA_EXEC+FA_READ+FA_OPEN+FA_CLOSE))	// Pass these SQL commands straight through
+	if (iAction & (FA_PREPARE+FA_FINALISE+FA_EXEC+
+					FA_RESET+FA_READ+FA_OPEN+FA_CLOSE))	// Pass these SQL commands straight through
 	 {
 		if (iAction & FA_OPEN)						// Allocate a lun slot for db and transaction handles
 		  {

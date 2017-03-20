@@ -12,6 +12,7 @@
 //			FA_OPEN		- Open Database
 //			FA_PREPARE	- Prepare (compile) an SQL command ready for stepping through results
 //			FA_STEP		- Transfer SQL data by unpacking each column to a format requested by the filehandler
+//			FA_RESET	- Reset a PREPARE back to it's start, ready to STEP through again
 //			FA_FINALISE	- Tidily close a PREPARE-STEP-FINALISE loop - other commands will also trigger this
 //			FA_EXEC		- Run an SQL command as a one-off. i.e. PREPARE-STEP-FINALISE in one go
 //			FA_CLOSE	- Close Database
@@ -58,8 +59,10 @@ int fa_sql_handler(	const int iAction,
 	  }
 
 	else if (iAction & FA_FINALISE ||				// Close down a PREPAREd statement (else memory leak)
-		(!(iAction & FA_STEP) && fa_lun[spDB->iLun].row != 0))		// Don't close down a PREPAREd statement if stepping
-	  {											// Cos of this tidy-up apps don't need to finalise
+		  (!(iAction & (FA_STEP+FA_RESET)) &&		// unless stepping or resetting
+			fa_lun[spDB->iLun].row != 0))
+	  												// Due to this tidy-up calling apps don't need to finalise
+	  {
 		ut_debug("fa_finalise");
 		ios=sqlite3_finalize(fa_lun[spDB->iLun].row);		// statement handle (from FA_PREPARE) to finalise
 		ut_check(ios == SQLITE_OK, "finalise");
@@ -151,6 +154,12 @@ int fa_sql_handler(	const int iAction,
 								&fa_lun[spDB->iLun].row,	// handle for prepared statement
 								0);					// pointer to unused statement (after null) if not null
 		ut_check(ios == SQLITE_OK, "prepare: %d", ios);
+	  }
+
+	else if (iAction & FA_RESET)					// Reset a FA_PREPARE back to the start, ready for more FA_STEP'ing
+	  {
+		ios=sqlite3_reset(fa_lun[spDB->iLun].row);	// handle for prepared statement
+		ut_check(ios == SQLITE_OK, "reset: %d", ios);
 	  }
 
     else if (iAction & FA_EXEC)					// Execute a custom SQL statement as a one-off

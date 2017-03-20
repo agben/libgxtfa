@@ -44,8 +44,7 @@
 #define	FA_PURGE	0x02000000
 #define	FA_ADD		0x04000000
 #define	FA_COUNT	0x08000000
-//	spare		0x08000000
-//	spare		0x10000000
+#define	FA_RESET	0x10000000
 //	spare		0x20000000
 //	spare		0x40000000
 //	spare		0x80000000
