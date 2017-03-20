@@ -37,7 +37,8 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
     int iColLen = 0;			// length of column name
 
 
-	while (*cp != '\0')
+//	while (*cp != '\0')
+	do
 	  {
 		if (*cp == '.')					// using alias marker to find end of table & start of column
 		  {
@@ -91,8 +92,10 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
 		else if (*cp == '.' && !iAlias)		// don't output table aliases
 		  {
 			ut_debug("TabLen:%d", iTabLen);
-			iLen-=(iTabLen-1);
-			*iBuffMax+=(iTabLen-1);
+//			iLen-=(iTabLen-1);
+//			*iBuffMax+=(iTabLen-1);
+			iLen-=iTabLen;
+			*iBuffMax+=iTabLen;
 			cpO-=iTabLen;					// Not using aliases so reverse back over it and the '.'
 			cp++;
 		  }
@@ -110,6 +113,7 @@ int fa_sql_generator_key(char *cpKey, struct fa_sql_db *spDb, int *iBuffMax, cha
 //		ut_debug("cp:%x cpO:%x cpO:%c%c%c%c%c%c%c", (int)cp, (int)cpO, cp2[0],cp2[1],cp2[2],cp2[3],cp2[4],cp2[5],cp2[6]);
 
 	  }
+	while (*cp != '\0');					// check after copying null terminator
 
 error:
 	return iLen;

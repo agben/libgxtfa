@@ -37,7 +37,6 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
     int i, j;
     char *cpKey = &spDb->sKey[iAction & FA_KEY_MASK][0];		// pointer to sql key definitions
 
-
     spTab=spDb->spTab;								// start pointing to 1st table in db
     i=0;
     while (spTab->bmField == 0)						// any fields requested from this table?
@@ -126,7 +125,7 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 		spCol=spTab->spCol;
 		for (i=0; i < spTab->iCol; i++)
 		  {
-			if ((spTab->bmField>>i) & 1)
+			if (((spTab->bmField>>i) & 1) && !(spCol->bmFlag & FA_COL_AUTO_B0))
 			  {
 				j=snprintf(cpO, iBuffMax, "%s=", spCol->sName);	// output list of selected field names
 				cpO+=j;
@@ -161,7 +160,6 @@ int fa_sql_generator(int iAction, struct fa_sql_db *spDb, char *cpPKey, char *cp
 		iBuffMax-=j;
 
 		cpO+=snprintf(cpO, iBuffMax, ";");
-
 	  }
 
 	else if (iAction & FA_WRITE)				// INSERT a row into the database
