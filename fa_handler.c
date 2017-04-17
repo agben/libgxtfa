@@ -74,18 +74,17 @@ int fa_handler(int iAction, struct fa_sql_db *spDB, char *cpSQL)
 						spDB->sPath,				// path name
 						spDB->sFile);				// file name
 
-			i=0;
-			while (i < FA_LUN_M0)
+			for (i=0; i < FA_LUN_M0; i++)		// need to check through all to ensure not already open
 			 {
 				if (strncmp(fa_lun[i].sFile, sBuff, FA_FULLNAME_S0) == 0)
 				  {
 					spDB->iLun=i;				// file already open so re-instate lun
-					i=0;						// mark as no error (ok to continue)
-					ut_error("file already open %s", sBuff);	// but flag the issue anyhow
+					ios=0;						// mark as no error (ok to continue)
+					ut_log("file already open %s", sBuff);	// but flag the issue anyhow
+					goto error;
 				  }
 				else if (spDB->iLun < 0 && fa_lun[i].sFile[0] == 0)
 					spDB->iLun=i;				// remember the 1st empty lun slot
-				i++;
 			 }
 
 			ut_check(	spDB->iLun >= 0,		// Room for another open file?

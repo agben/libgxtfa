@@ -99,8 +99,9 @@ int fa_sql_handler(	const int iAction,
 					while (strcmp(spSQLtable->sName, sTabName) != 0)
 					  {
 						spSQLtable++;
-						if (++j > spDB->iTab)
-						ut_error("table name not found:%s", sTabName);
+						ut_check (++j <= spDB->iTab, "table name not found:%s", sTabName);
+//						if (++j > spDB->iTab)
+//							ut_error("table name not found:%s", sTabName);
 					  }
 
 					snprintf(	sColName,			// Found table so now find the column's name
@@ -114,7 +115,8 @@ int fa_sql_handler(	const int iAction,
 				while (strcmp(spSQLcol->sName, sColName) != 0)
 				  {
 					spSQLcol++;
-					if (++j > spDB->iColMax) ut_error("column name not found:%s", sColName);
+					ut_check(++j <= spDB->iColMax, "column name not found:%s", sColName);
+//					if (++j > spDB->iColMax) ut_error("column name not found:%s", sColName);
 				  }
 
 				ut_debug(	"matched with: %s type:%d",	spSQLcol->sName,
@@ -186,7 +188,6 @@ int fa_sql_handler(	const int iAction,
 	  }
 
 	return ios;
-
 
 error:
 	ut_error("%s", sqlite3_errmsg(fa_lun[spDB->iLun].db));			// A more informative error description
