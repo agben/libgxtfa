@@ -132,10 +132,17 @@ int fa_sql_handler(	const int iAction,
 							FA_FIELD_CHAR_S0);					// copy char with no trailing null
 
 				else											// or a string/blob column?
-					snprintf(	spSQLcol->cpPos,				//output column data to field data string
-								spSQLcol->iSize,				//limit size to max column size
-								"%s",							//null terninated string data
-								(char *) sqlite3_column_blob(fa_lun[spDB->iLun].row, i));	//the column data
+				  {
+					char *cp = (char *) sqlite3_column_blob(fa_lun[spDB->iLun].row, i);
+					if (cp == 0)								// extracting a NULL string?
+						*(int *)spSQLcol->cpPos=0;
+					else
+						snprintf(spSQLcol->cpPos,				//output column data to field data string
+								 spSQLcol->iSize,				//limit size to max column size
+								 "%s",							//null terninated string data
+								 cp);							//the column data
+//								 (char *) sqlite3_column_blob(fa_lun[spDB->iLun].row, i));	//the column data
+				  }
 				i++;											// next column
 			  }
 			ios=FA_OK_IV0;										// return a 0 if read a row ok
