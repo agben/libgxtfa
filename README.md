@@ -19,6 +19,6 @@ Initially written as a wrapper for sqlite3 the routines should evolve to cover a
 Functions are added/improved as and when they are needed by other gxt projects. Currently these are:-
 
 - fa_handler --- generic file/database handler - the interface to libgxtfa for other projects.
-- fa_sql_generator --- generate sql scripts from simple file access requests.  
-- fa_sql_generator_key --- generate sql key combinations for SELECT statements.  
-- fa_sql_handler --- wrapper for calling the sql engine (currently only sqlite3).  
+- fa_sql_generator --- generate sql scripts from simple file access requests.
+- fa_sql_generator_key --- generate sql key combinations for SELECT statements.
+- fa_sql_handler --- wrapper for calling the sql engine (currently only sqlite3).
